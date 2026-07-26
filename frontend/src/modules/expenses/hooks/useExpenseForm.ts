@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { CreateExpenseInput } from '../api/dto';
+import { useState, useEffect } from 'react';
+import type { CreateExpenseInput, UpdateExpenseInput } from '../api/dto';
 import { expenseService } from '../api/expenseService';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,12 @@ export function useExpenseForm(initialValues?: Partial<CreateExpenseInput>) {
   });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (initialValues) {
+      setValues(prev => ({ ...prev, ...initialValues }));
+    }
+  }, [initialValues?.amount, initialValues?.category, initialValues?.title]);
 
   const updateField = (field: keyof CreateExpenseInput, value: any) => {
     setValues(prev => ({ ...prev, [field]: value }));
@@ -34,9 +40,47 @@ export function useExpenseForm(initialValues?: Partial<CreateExpenseInput>) {
       const newExpense = await expenseService.createExpense(input);
       navigate(`/expenses/${newExpense.id}`);
     } catch (err: any) {
-      setValidationErrors(err.message.split(', '));
+      setValidationErrors(err.message ? err.message.split(', ') : ['Failed to save']);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const updateExpense = async (id: string) => {
+    setIsSubmitting(true);
+    setValidationErrors([]);
+    try {
+      const input: UpdateExpenseInput = {
+        title: values.title,
+        amount: values.amount,
+        category: values.category,
+        paymentMode: values.paymentMode,
+        partyId: values.partyId,
+        date: values.date,
+        note: values.note,
+        tags: values.tags,
+        recurringHint: values.recurringHint,
+      };
+      await expenseService.updateExpense(id, input);
+      navigate(`/expenses/${id}`);
+    } catch (err: any) {
+      setValidationErrors(err.message ? err.message.split(', ') : ['Failed to update']);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const loadFromLastExpense = async () => {
+    const last = await expenseService.copyLastExpense();
+    if (last) {
+      setValues(prev => ({
+        ...prev,
+        title: last.title || prev.title,
+        amount: last.amount,
+        category: last.category,
+        paymentMode: last.paymentMode,
+        note: last.note || prev.note,
+      }));
     }
   };
 
@@ -45,6 +89,8 @@ export function useExpenseForm(initialValues?: Partial<CreateExpenseInput>) {
     validationErrors,
     isSubmitting,
     updateField,
-    saveExpense
+    saveExpense,
+    updateExpense,
+    loadFromLastExpense
   };
 }

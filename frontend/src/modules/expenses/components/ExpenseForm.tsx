@@ -1,15 +1,19 @@
-
 import { useExpenseForm } from '../hooks/useExpenseForm';
 import { CategoryPicker } from './CategoryPicker';
 import { PaymentModePicker } from './PaymentModePicker';
+import { PartySelector } from './PartySelector';
+import { RecurringHintPicker } from './RecurringHintPicker';
 import type { CreateExpenseInput } from '../api/dto';
 
 interface ExpenseFormProps {
-  initialValues?: Partial<CreateExpenseInput>;
+  initialValues?: Partial<CreateExpenseInput & { id?: string }>;
+  isEditing?: boolean;
 }
 
-export function ExpenseForm({ initialValues }: ExpenseFormProps) {
-  const { values, validationErrors, isSubmitting, updateField, saveExpense } = useExpenseForm(initialValues);
+export function ExpenseForm({ initialValues, isEditing }: ExpenseFormProps) {
+  const { values, validationErrors, isSubmitting, updateField, saveExpense, updateExpense } = useExpenseForm(initialValues);
+
+  const handleSave = isEditing && initialValues?.id ? () => updateExpense(initialValues.id!) : saveExpense;
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -22,7 +26,7 @@ export function ExpenseForm({ initialValues }: ExpenseFormProps) {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-lg">$</span>
           <input
@@ -37,26 +41,26 @@ export function ExpenseForm({ initialValues }: ExpenseFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
         <CategoryPicker value={values.category} onChange={v => updateField('category', v)} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Payment Mode</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Payment Mode *</label>
         <PaymentModePicker value={values.paymentMode} onChange={v => updateField('paymentMode', v)} />
       </div>
 
       <div className="space-y-4 pt-4 border-t border-gray-100">
         <details className="group">
           <summary className="text-sm font-medium text-primary-600 cursor-pointer list-none select-none">
-            + Show Optional Details (Title, Note, Date)
+            + Show Optional Details
           </summary>
           <div className="mt-4 space-y-4">
-             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title (Optional)</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
               <input
                 type="text"
-                value={values.title}
+                value={values.title || ''}
                 onChange={e => updateField('title', e.target.value)}
                 placeholder="Auto-generated from category if empty"
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -81,16 +85,32 @@ export function ExpenseForm({ initialValues }: ExpenseFormProps) {
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
+            <div>
+              <PartySelector value={values.partyId} onChange={v => updateField('partyId', v)} />
+            </div>
+            <div>
+              <RecurringHintPicker value={values.recurringHint || 'none'} onChange={v => updateField('recurringHint', v)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+              <input
+                type="text"
+                value={(values.tags || []).join(', ')}
+                onChange={e => updateField('tags', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
+                placeholder="office, urgent, tax-related"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
           </div>
         </details>
       </div>
 
       <button
-        onClick={saveExpense}
+        onClick={handleSave}
         disabled={isSubmitting}
         className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold shadow-sm hover:bg-gray-800 disabled:opacity-50 transition-colors"
       >
-        {isSubmitting ? 'Saving...' : 'Save Expense'}
+        {isSubmitting ? 'Saving...' : isEditing ? 'Update Expense' : 'Save Expense'}
       </button>
     </div>
   );

@@ -32,12 +32,17 @@ export function useExpensesList(initialFilters?: ExpenseListQuery) {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
+  const resetFilters = () => {
+    setFilters({});
+  };
+
   return {
     expenses,
     summaries,
     filters,
     isLoading,
     updateFilters,
+    resetFilters,
     refresh: loadData
   };
 }

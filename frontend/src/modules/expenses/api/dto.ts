@@ -66,19 +66,21 @@ export interface ExpenseListResponse {
   totalCount: number;
 }
 
+export interface CategorySummaryItem {
+  category: string;
+  totalAmount: number;
+  count: number;
+}
+
 export interface ExpenseSummaryResponse {
   todayTotal: number;
   weekTotal: number;
   monthTotal: number;
   topCategory: { name: string; amount: number } | null;
-  cashOutTotal: number; // e.g. 'cash'
-  digitalOutTotal: number; // e.g. 'upi' | 'bank' | 'card'
-}
-
-export interface CategorySummaryItem {
-  category: string;
-  totalAmount: number;
-  count: number;
+  cashOutTotal: number;
+  digitalOutTotal: number;
+  categoryBreakdown: CategorySummaryItem[];
+  paymentModeBreakdown: { paymentMode: string; totalAmount: number; count: number }[];
 }
 
 export interface CategorySummaryResponse {

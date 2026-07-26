@@ -1,4 +1,4 @@
-import type { ExpenseRecord } from "../../../lib/db";
+import type { ExpenseRecord, ExpenseSettingsRecord, ExpenseCategoryRecord } from "../../../lib/db";
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../../lib/db';
 import { buildExpenseNumber } from './expensesDomain';
@@ -61,4 +61,55 @@ export async function getExpenseRecordById(id: string): Promise<ExpenseRecord | 
 
 export async function listExpenseRecords(): Promise<ExpenseRecord[]> {
   return await db.expenses.orderBy('date').reverse().toArray();
+}
+
+export async function getExpenseSettings(): Promise<ExpenseSettingsRecord> {
+  let settings = await db.expenseSettings.get('singleton');
+  if (!settings) {
+    settings = { id: 'singleton', nextExpenseNumber: 1, allowCustomCategories: false, recentCategories: [] };
+    await db.expenseSettings.add(settings);
+  }
+  return settings;
+}
+
+export async function updateExpenseSettings(updates: Partial<ExpenseSettingsRecord>): Promise<ExpenseSettingsRecord> {
+  await db.expenseSettings.update('singleton', updates);
+  const settings = await db.expenseSettings.get('singleton');
+  if (!settings) throw new Error('Settings not found');
+  return settings;
+}
+
+export async function listExpenseCategories(): Promise<ExpenseCategoryRecord[]> {
+  return await db.expenseCategories.toArray();
+}
+
+export async function addExpenseCategory(name: string): Promise<ExpenseCategoryRecord> {
+  const cat: ExpenseCategoryRecord = {
+    id: uuidv4(),
+    name,
+    isSystem: false,
+    createdAt: new Date().toISOString()
+  };
+  await db.expenseCategories.add(cat);
+  return cat;
+}
+
+export async function seedDefaultCategories(): Promise<void> {
+  const existing = await db.expenseCategories.count();
+  if (existing > 0) return;
+
+  const defaults = [
+    'stock purchase', 'supplier payment', 'rent', 'utilities',
+    'transport', 'salary/staff', 'packaging', 'marketing',
+    'maintenance', 'subscriptions', 'food/tea', 'miscellaneous'
+  ];
+
+  for (const name of defaults) {
+    await db.expenseCategories.add({
+      id: uuidv4(),
+      name,
+      isSystem: true,
+      createdAt: new Date().toISOString()
+    });
+  }
 }
