@@ -1,4 +1,3 @@
-
 import { Banknote, CreditCard, Landmark, Smartphone, MoreHorizontal } from 'lucide-react';
 
 const MODES = [
@@ -12,11 +11,14 @@ const MODES = [
 interface PaymentModePickerProps {
   value: string;
   onChange: (mode: any) => void;
+  compact?: boolean;
 }
 
-export function PaymentModePicker({ value, onChange }: PaymentModePickerProps) {
+export function PaymentModePicker({ value, onChange, compact }: PaymentModePickerProps) {
+  const gridClass = compact ? 'grid grid-cols-5 gap-1' : 'grid grid-cols-5 gap-2';
+
   return (
-    <div className="grid grid-cols-5 gap-2">
+    <div className={gridClass}>
       {MODES.map(mode => {
         const Icon = mode.icon;
         const isActive = value === mode.id;
@@ -25,14 +27,14 @@ export function PaymentModePicker({ value, onChange }: PaymentModePickerProps) {
             key={mode.id}
             type="button"
             onClick={() => onChange(mode.id)}
-            className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-colors ${
+            className={`flex flex-col items-center justify-center rounded-lg border transition-colors ${
               isActive
                 ? 'bg-primary-50 border-primary-500 text-primary-700'
                 : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
-            }`}
+            } ${compact ? 'p-1.5' : 'p-2'}`}
           >
-            <Icon className="w-5 h-5 mb-1" strokeWidth={isActive ? 2.5 : 2} />
-            <span className="text-[10px] font-medium">{mode.label}</span>
+            <Icon className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} mb-0.5`} strokeWidth={isActive ? 2.5 : 2} />
+            <span className={`font-medium ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{mode.label}</span>
           </button>
         );
       })}

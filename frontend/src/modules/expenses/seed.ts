@@ -6,11 +6,22 @@ import { subDays } from 'date-fns';
 export async function initDbSeed() {
   try {
     const existingExpenses = await db.expenses.count();
-    if (existingExpenses > 0) return; // DB already seeded
+    const existingCategories = await db.expenseCategories.count();
 
-    console.log('Seeding initial data...');
+    if (existingCategories === 0) {
+      const defaults = [
+        'stock purchase', 'supplier payment', 'rent', 'utilities',
+        'transport', 'salary/staff', 'packaging', 'marketing',
+        'maintenance', 'subscriptions', 'food/tea', 'miscellaneous'
+      ];
+      const now = new Date().toISOString();
+      await db.expenseCategories.bulkAdd(
+        defaults.map(name => ({ id: uuidv4(), name, isSystem: true, createdAt: now }))
+      );
+    }
 
-    // 1. Seed a mock supplier party
+    if (existingExpenses > 0) return;
+
     const supplierId = uuidv4();
     await db.parties.add({
       id: supplierId,
@@ -19,10 +30,16 @@ export async function initDbSeed() {
       phone: '555-0199'
     });
 
-    // 2. Helper to get dates relative to today
+    const customerId = uuidv4();
+    await db.parties.add({
+      id: customerId,
+      displayName: 'Green Leaf Cafe',
+      primaryType: 'customer',
+      phone: '555-0246'
+    });
+
     const daysAgo = (days: number) => subDays(new Date(), days).toISOString();
 
-    // 3. Create dummy expenses using the internal API service to ensure consistency
     await expenseService.createExpense({
       title: 'Monthly Rent',
       amount: 1200,
@@ -50,6 +67,31 @@ export async function initDbSeed() {
       date: daysAgo(0)
     });
 
+    await expenseService.createExpense({
+      title: 'Office Supplies',
+      amount: 89.99,
+      category: 'stock purchase',
+      paymentMode: 'card',
+      date: daysAgo(3)
+    });
+
+    await expenseService.createExpense({
+      title: 'Electricity Bill',
+      amount: 180,
+      category: 'utilities',
+      paymentMode: 'bank',
+      date: daysAgo(7),
+      recurringHint: 'monthly'
+    });
+
+    await expenseService.createExpense({
+      title: 'Team Lunch',
+      amount: 45,
+      category: 'food/tea',
+      paymentMode: 'cash',
+      date: daysAgo(1)
+    });
+
     const voidedExp = await expenseService.createExpense({
       title: 'Software Sub (Cancelled)',
       amount: 49.99,
@@ -59,8 +101,6 @@ export async function initDbSeed() {
     });
 
     await expenseService.voidExpense(voidedExp.id);
-
-    console.log('Seed complete.');
   } catch (error) {
     console.error('Failed to seed DB', error);
   }

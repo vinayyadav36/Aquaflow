@@ -18,7 +18,9 @@ import {
 } from '../services/expensesRepository';
 import { validateExpenseInput, getTodayExpensesTotal, getPeriodExpensesTotal } from '../services/expensesDomain';
 import { parseISO, isWithinInterval, startOfDay, endOfDay, subDays } from 'date-fns';
-import type { ExpenseRecord } from '../../../lib/db';
+import type { ExpenseRecord, ExpenseCategoryRecord } from '../../../lib/db';
+import { db } from '../../../lib/db';
+import { v4 as uuidv4 } from 'uuid';
 
 export class LocalExpenseService implements IExpenseService {
   private mapToDto(record: ExpenseRecord): ExpenseDetailResponse {
@@ -47,7 +49,7 @@ export class LocalExpenseService implements IExpenseService {
   }
 
   async updateExpense(id: string, input: UpdateExpenseInput): Promise<ExpenseDetailResponse> {
-    const updates = { ...input } as any; // Ignore partyId null check for now
+    const updates = { ...input } as any;
     if (updates.partyId === null) updates.partyId = undefined;
     const record = await updateExpenseRecord(id, updates);
     return this.mapToDto(record);
@@ -63,18 +65,10 @@ export class LocalExpenseService implements IExpenseService {
     let records = await listExpenseRecords();
 
     if (query) {
-      if (query.status) {
-        records = records.filter(r => r.status === query.status);
-      }
-      if (query.category) {
-        records = records.filter(r => r.category === query.category);
-      }
-      if (query.paymentMode) {
-        records = records.filter(r => r.paymentMode === query.paymentMode);
-      }
-      if (query.partyId) {
-        records = records.filter(r => r.partyId === query.partyId);
-      }
+      if (query.status) records = records.filter(r => r.status === query.status);
+      if (query.category) records = records.filter(r => r.category === query.category);
+      if (query.paymentMode) records = records.filter(r => r.paymentMode === query.paymentMode);
+      if (query.partyId) records = records.filter(r => r.partyId === query.partyId);
       if (query.search) {
         const s = query.search.toLowerCase();
         records = records.filter(r =>
@@ -89,25 +83,19 @@ export class LocalExpenseService implements IExpenseService {
         if (query.dateRange === 'today') start = startOfDay(new Date());
         if (query.dateRange === '7days') start = startOfDay(subDays(new Date(), 7));
         if (query.dateRange === '30days') start = startOfDay(subDays(new Date(), 30));
-
         records = records.filter(r => {
-           const d = parseISO(r.date);
-           return isWithinInterval(d, { start, end });
+          const d = parseISO(r.date);
+          return isWithinInterval(d, { start, end });
         });
       }
-
       if (query.sortBy) {
         if (query.sortBy === 'highest_amount') records.sort((a,b) => b.amount - a.amount);
         if (query.sortBy === 'oldest') records.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         if (query.sortBy === 'category') records.sort((a,b) => a.category.localeCompare(b.category));
-        // default newest already applied by DB
       }
     }
 
-    return {
-      data: records.map(this.mapToDto),
-      totalCount: records.length
-    };
+    return { data: records.map(this.mapToDto), totalCount: records.length };
   }
 
   async voidExpense(id: string): Promise<VoidExpenseResponse> {
@@ -143,38 +131,44 @@ export class LocalExpenseService implements IExpenseService {
     const records = await listExpenseRecords();
     const active = records.filter(r => r.status === 'recorded');
 
-    let cashOutTotal = 0;
-    let digitalOutTotal = 0;
+    let cashOutTotal = 0, digitalOutTotal = 0;
     const categoryTotals: Record<string, number> = {};
-
+    const categoryCount: Record<string, number> = {};
+    const paymentModeTotals: Record<string, number> = {};
+    const paymentModeCount: Record<string, number> = {};
     active.forEach(r => {
       if (r.paymentMode === 'cash') cashOutTotal += r.amount;
       else digitalOutTotal += r.amount;
-
       categoryTotals[r.category] = (categoryTotals[r.category] || 0) + r.amount;
+      categoryCount[r.category] = (categoryCount[r.category] || 0) + 1;
+      paymentModeTotals[r.paymentMode] = (paymentModeTotals[r.paymentMode] || 0) + r.amount;
+      paymentModeCount[r.paymentMode] = (paymentModeCount[r.paymentMode] || 0) + 1;
     });
 
     let topCategory = null;
     let max = 0;
     for (const [name, amount] of Object.entries(categoryTotals)) {
-      if (amount > max) {
-        max = amount;
-        topCategory = { name, amount };
-      }
+      if (amount > max) { max = amount; topCategory = { name, amount }; }
     }
+
+    const categoryBreakdown = Object.entries(categoryTotals).map(([category, totalAmount]) => ({
+      category, totalAmount, count: categoryCount[category] || 0
+    })).sort((a, b) => b.totalAmount - a.totalAmount);
+
+    const paymentModeBreakdown = Object.entries(paymentModeTotals).map(([paymentMode, totalAmount]) => ({
+      paymentMode, totalAmount, count: paymentModeCount[paymentMode] || 0
+    })).sort((a, b) => b.totalAmount - a.totalAmount);
 
     return {
       todayTotal: getTodayExpensesTotal(records),
       weekTotal: getPeriodExpensesTotal(records, 7),
       monthTotal: getPeriodExpensesTotal(records, 30),
-      topCategory,
-      cashOutTotal,
-      digitalOutTotal
+      topCategory, cashOutTotal, digitalOutTotal,
+      categoryBreakdown, paymentModeBreakdown
     };
   }
 
   async getExpenseCategorySummaryApi(_query?: ExpenseListQuery): Promise<CategorySummaryResponse> {
-    // In a real API this would apply filters and aggregate.
     const records = await listExpenseRecords();
     const active = records.filter(r => r.status === 'recorded');
 
@@ -186,12 +180,69 @@ export class LocalExpenseService implements IExpenseService {
     });
 
     return {
-      categories: Object.entries(categoryMap).map(([category, stats]) => ({
-        category,
-        totalAmount: stats.totalAmount,
-        count: stats.count
-      })).sort((a,b) => b.totalAmount - a.totalAmount)
+      categories: Object.entries(categoryMap)
+        .map(([category, stats]) => ({ category, totalAmount: stats.totalAmount, count: stats.count }))
+        .sort((a, b) => b.totalAmount - a.totalAmount)
     };
+  }
+
+  async getCategories(): Promise<ExpenseCategoryRecord[]> {
+    return db.expenseCategories.toArray();
+  }
+
+  async addCategory(name: string): Promise<ExpenseCategoryRecord> {
+    const existing = await db.expenseCategories.where('name').equals(name).first();
+    if (existing) return existing;
+    const cat: ExpenseCategoryRecord = {
+      id: uuidv4(), name, isSystem: false, createdAt: new Date().toISOString()
+    };
+    await db.expenseCategories.add(cat);
+    return cat;
+  }
+
+  async getSettings() {
+    let settings = await db.expenseSettings.get('singleton');
+    if (!settings) {
+      settings = { id: 'singleton', nextExpenseNumber: 1, allowCustomCategories: false, recentCategories: [] };
+      await db.expenseSettings.add(settings);
+    }
+    return settings;
+  }
+
+  async updateSettings(updates: { allowCustomCategories?: boolean; recentCategories?: string[] }) {
+    await db.expenseSettings.update('singleton', updates);
+    return this.getSettings();
+  }
+
+  async copyLastExpense(): Promise<CreateExpenseInput | null> {
+    const records = await listExpenseRecords();
+    const last = records.find(r => r.status === 'recorded');
+    if (!last) return null;
+    return {
+      title: last.title,
+      amount: last.amount,
+      category: last.category,
+      paymentMode: last.paymentMode,
+      partyId: last.partyId,
+      note: last.note,
+      tags: last.tags,
+      recurringHint: last.recurringHint,
+    };
+  }
+
+  async initializeDefaults(): Promise<void> {
+    const count = await db.expenseCategories.count();
+    if (count > 0) return;
+
+    const defaults = [
+      'stock purchase', 'supplier payment', 'rent', 'utilities',
+      'transport', 'salary/staff', 'packaging', 'marketing',
+      'maintenance', 'subscriptions', 'food/tea', 'miscellaneous'
+    ];
+    const now = new Date().toISOString();
+    await db.expenseCategories.bulkAdd(
+      defaults.map(name => ({ id: uuidv4(), name, isSystem: true, createdAt: now }))
+    );
   }
 }
 

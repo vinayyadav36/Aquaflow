@@ -9,6 +9,7 @@ import type {
   VoidExpenseResponse,
   DuplicateExpenseResponse
 } from './dto';
+import type { ExpenseCategoryRecord } from '../../../lib/db';
 
 export interface IExpenseService {
   createExpense(input: CreateExpenseInput): Promise<ExpenseDetailResponse>;
@@ -19,4 +20,10 @@ export interface IExpenseService {
   duplicateExpense(id: string): Promise<DuplicateExpenseResponse>;
   getExpenseSummary(query?: ExpenseListQuery): Promise<ExpenseSummaryResponse>;
   getExpenseCategorySummaryApi(query?: ExpenseListQuery): Promise<CategorySummaryResponse>;
+  getCategories(): Promise<ExpenseCategoryRecord[]>;
+  addCategory(name: string): Promise<ExpenseCategoryRecord>;
+  getSettings(): Promise<{ id: string; nextExpenseNumber: number; allowCustomCategories: boolean; recentCategories: string[] }>;
+  updateSettings(updates: { allowCustomCategories?: boolean; recentCategories?: string[] }): Promise<any>;
+  copyLastExpense(): Promise<CreateExpenseInput | null>;
+  initializeDefaults(): Promise<void>;
 }

@@ -9,6 +9,7 @@ import planRoutes from './routes/planRoutes';
 import downloadRoutes from './routes/downloadRoutes';
 import communityRoutes from './routes/communityRoutes';
 import adminRoutes from './routes/adminRoutes';
+import expenseRoutes from './routes/expenses/expenseRoutes';
 
 const app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ app.use('/api/plans', planRoutes);
 app.use('/api/downloads', downloadRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));

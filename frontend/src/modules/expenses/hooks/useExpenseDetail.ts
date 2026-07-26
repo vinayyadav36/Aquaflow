@@ -20,9 +20,7 @@ export function useExpenseDetail(id: string) {
     }
   }, [id]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const voidAction = async () => {
     if (!expense || expense.status === 'voided') return;
@@ -50,10 +48,7 @@ export function useExpenseDetail(id: string) {
     linkedParty: expense?.partySnapshot,
     isLoading,
     error,
-    actions: {
-      voidAction,
-      duplicateAction
-    },
+    actions: { voidAction, duplicateAction },
     refresh: loadData
   };
 }
