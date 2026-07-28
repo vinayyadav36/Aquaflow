@@ -14,7 +14,9 @@ import {
   createExpenseRecord,
   getExpenseRecordById,
   listExpenseRecords,
-  updateExpenseRecord
+  updateExpenseRecord,
+  deleteExpenseCategory as deleteCategoryRepo,
+  renameExpenseCategory as renameCategoryRepo
 } from '../services/expensesRepository';
 import { validateExpenseInput, getTodayExpensesTotal, getPeriodExpensesTotal } from '../services/expensesDomain';
 import { parseISO, isWithinInterval, startOfDay, endOfDay, subDays } from 'date-fns';
@@ -42,7 +44,9 @@ export class LocalExpenseService implements IExpenseService {
       tags: input.tags,
       recurringHint: input.recurringHint || 'none',
       status: 'recorded',
-      createdSource: input.createdSource || 'manual'
+      createdSource: input.createdSource || 'manual',
+      receiptUrl: input.receiptUrl,
+      receiptName: input.receiptName,
     });
 
     return this.mapToDto(record);
@@ -205,6 +209,14 @@ export class LocalExpenseService implements IExpenseService {
     return cat;
   }
 
+  async deleteCategory(id: string): Promise<void> {
+    return deleteCategoryRepo(id);
+  }
+
+  async renameCategory(id: string, newName: string): Promise<ExpenseCategoryRecord> {
+    return renameCategoryRepo(id, newName);
+  }
+
   async getSettings() {
     let settings = await db.expenseSettings.get('singleton');
     if (!settings) {
@@ -297,6 +309,12 @@ export class RemoteExpenseService implements IExpenseService {
     throw new Error('Not implemented: Remote sync is an optional future feature');
   }
   async initializeDefaults(): Promise<void> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async deleteCategory(_category: string): Promise<void> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async renameCategory(_id: string, _newName: string): Promise<ExpenseCategoryRecord> {
     throw new Error('Not implemented: Remote sync is an optional future feature');
   }
 }

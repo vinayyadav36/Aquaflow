@@ -37,7 +37,7 @@ export class BackupService {
     let payload: BackupPayload;
     try {
       payload = JSON.parse(jsonString);
-    } catch (e) {
+    } catch (_e) {
       throw new Error('Invalid JSON file format.');
     }
 

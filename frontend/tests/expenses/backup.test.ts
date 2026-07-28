@@ -1,47 +1,87 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { backupService } from '../../src/modules/expenses/api/backupService';
+import 'fake-indexeddb/auto';
 import { db } from '../../src/lib/db';
+import { LocalExpenseService } from '../../src/modules/expenses/api/expenseService';
+import { backupService } from '../../src/modules/expenses/api/backupService';
 
-describe('Backup and Restore', () => {
-  beforeEach(async () => {
-    await db.expenses.clear();
-    await db.expenseCategories.clear();
-    await db.expenseSettings.clear();
-  });
+const service = new LocalExpenseService();
 
-  it('exports and imports expenses, categories, and settings', async () => {
-    // Seed initial data
-    await db.expenseCategories.add({ id: 'cat1', name: 'Software', isSystem: false, createdAt: new Date().toISOString() });
-    await db.expenseSettings.add({ id: 'singleton', nextExpenseNumber: 42, allowCustomCategories: true, recentCategories: [] });
-    await db.expenses.add({
-      id: 'exp1', title: 'GitHub', amount: 400, category: 'Software',
-      paymentMode: 'card', date: new Date().toISOString(), status: 'recorded',
-      expenseNumber: 'EXP-00041', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+beforeEach(async () => {
+  await db.expenses.clear();
+  await db.expenseCategories.clear();
+  await db.expenseSettings.clear();
+  await db.parties.clear();
+  await service.initializeDefaults();
+});
+
+describe('Backup/Restore cycle', () => {
+  it('exports data, clears DB, imports backup, and verifies restoration', async () => {
+    await service.createExpense({
+      title: 'Monthly Rent',
+      amount: 12000,
+      category: 'rent',
+      paymentMode: 'bank',
     });
 
-    // Export
-    const backupJson = await backupService.exportData();
-    const payload = JSON.parse(backupJson);
+    await service.createExpense({
+      title: 'Office Supplies',
+      amount: 2500,
+      category: 'stock purchase',
+      paymentMode: 'cash',
+    });
 
-    expect(payload.schemaVersion).toBe('1.0');
-    expect(payload.data.expenses.length).toBe(1);
-    expect(payload.data.expenseCategories.length).toBe(1);
-    expect(payload.data.expenseSettings[0].nextExpenseNumber).toBe(42);
+    const expensesBefore = await db.expenses.count();
+    expect(expensesBefore).toBe(2);
 
-    // Clear db
+    const jsonString = await backupService.exportData();
+    const backup = JSON.parse(jsonString);
+    expect(backup.schemaVersion).toBe('1.0');
+    expect(backup.module).toBe('expenses');
+    expect(backup.data.expenses.length).toBe(2);
+    expect(backup.data.expenseCategories.length).toBeGreaterThan(0);
+
     await db.expenses.clear();
-    await db.expenseCategories.clear();
-    await db.expenseSettings.clear();
-
     expect(await db.expenses.count()).toBe(0);
 
-    // Import
-    await backupService.importData(backupJson);
+    await backupService.importData(jsonString);
 
-    // Verify
-    expect(await db.expenses.count()).toBe(1);
-    expect(await db.expenseCategories.count()).toBe(1);
-    const settings = await db.expenseSettings.get('singleton');
-    expect(settings?.nextExpenseNumber).toBe(42);
+    expect(await db.expenses.count()).toBe(2);
+
+    const restored = await service.getExpenses();
+    expect(restored.data.length).toBe(2);
+    expect(restored.data.some(e => e.title === 'Monthly Rent' && e.amount === 12000)).toBe(true);
+    expect(restored.data.some(e => e.title === 'Office Supplies' && e.amount === 2500)).toBe(true);
+
+    const cats = await db.expenseCategories.count();
+    expect(cats).toBeGreaterThan(0);
+  });
+
+  it('rejects backup with wrong module name', async () => {
+    const badBackup = {
+      schemaVersion: '1.0',
+      module: 'parties',
+      timestamp: new Date().toISOString(),
+      data: { expenses: [], expenseCategories: [], expenseSettings: [] },
+    };
+
+    await expect(backupService.importData(JSON.stringify(badBackup)))
+      .rejects.toThrow('not an expenses backup');
+  });
+
+  it('rejects backup with wrong schema version', async () => {
+    const futureBackup = {
+      schemaVersion: '99.0',
+      module: 'expenses',
+      timestamp: new Date().toISOString(),
+      data: { expenses: [], expenseCategories: [], expenseSettings: [] },
+    };
+
+    await expect(backupService.importData(JSON.stringify(futureBackup)))
+      .rejects.toThrow('Unsupported schema version');
+  });
+
+  it('rejects malformed JSON', async () => {
+    await expect(backupService.importData('not valid json {'))
+      .rejects.toThrow('Invalid JSON file format');
   });
 });

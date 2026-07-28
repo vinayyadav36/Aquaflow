@@ -9,6 +9,8 @@ import { QuickExpenseEntry } from './components/QuickExpenseEntry';
 import { CategoryBreakdownView } from './components/CategoryBreakdownView';
 import { PresetExpenses } from './components/PresetExpenses';
 import { EmptyExpensesState } from './components/EmptyExpensesState';
+import { BudgetIndicator } from './components/BudgetIndicator';
+import { DaybookView } from './components/DaybookView';
 
 export default function ExpensesListPage() {
   const { expenses, summaries, filters, isLoading, updateFilters, resetFilters } = useExpensesList();
@@ -62,6 +64,8 @@ export default function ExpensesListPage() {
       ) : (
         <>
           {summaries && <ExpenseCategorySummary summaries={summaries} />}
+          <BudgetIndicator />
+          <DaybookView />
           <PresetExpenses />
           <CategoryBreakdownView />
           <div className="mt-2">

@@ -101,6 +101,16 @@ export function ExpenseForm({ initialValues, isEditing }: ExpenseFormProps) {
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Receipt URL</label>
+              <input
+                type="url"
+                value={values.receiptUrl || ''}
+                onChange={e => updateField('receiptUrl', e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
           </div>
         </details>
       </div>

@@ -1,15 +1,17 @@
 // DTOs for the Expenses API
 export interface CreateExpenseInput {
-  title?: string; // Optional because it can auto-generate from category
+  title?: string;
   amount: number;
   category: string;
   paymentMode: 'cash' | 'upi' | 'bank' | 'card' | 'other';
   partyId?: string;
-  date?: string; // ISO date string, defaults to today
+  date?: string;
   note?: string;
   tags?: string[];
   recurringHint?: 'none' | 'daily' | 'weekly' | 'monthly' | 'custom';
   createdSource?: 'manual' | 'supplier_payment' | 'adjustment';
+  receiptUrl?: string;
+  receiptName?: string;
 }
 
 export interface UpdateExpenseInput {
@@ -22,6 +24,9 @@ export interface UpdateExpenseInput {
   note?: string;
   tags?: string[];
   recurringHint?: 'none' | 'daily' | 'weekly' | 'monthly' | 'custom';
+  status?: 'recorded' | 'voided';
+  receiptUrl?: string;
+  receiptName?: string;
 }
 
 export interface ExpenseListQuery {
@@ -59,6 +64,8 @@ export interface ExpenseDetailResponse {
   createdAt: string;
   updatedAt: string;
   createdSource?: 'manual' | 'supplier_payment' | 'adjustment';
+  receiptUrl?: string;
+  receiptName?: string;
 }
 
 export interface ExpenseListResponse {

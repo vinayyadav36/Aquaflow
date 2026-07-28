@@ -1,5 +1,5 @@
 import { formatCurrency } from "../../../utils/currency";
-import { Ban, Users, RefreshCw } from 'lucide-react';
+import { Ban, Users, RefreshCw, FileText } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import type { ExpenseDetailResponse } from '../api/dto';
 
@@ -77,6 +77,20 @@ export function ExpenseDetailCard({ expense, linkedParty, onNavigateParty }: Exp
                   <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">{tag}</span>
                 ))}
               </div>
+            </div>
+          )}
+          {expense.receiptUrl && (
+            <div className="col-span-2 mt-2">
+              <span className="block text-gray-400 text-xs font-semibold uppercase mb-1">Receipt</span>
+              <a
+                href={expense.receiptUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 text-sm font-medium"
+              >
+                <FileText className="w-4 h-4" />
+                {expense.receiptName || 'View Receipt'}
+              </a>
             </div>
           )}
         </div>

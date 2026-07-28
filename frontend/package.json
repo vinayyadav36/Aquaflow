@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.4.2",
+    "@oxlint/binding-win32-x64-msvc": "^1.76.0",
+    "@rolldown/binding-win32-x64-msvc": "^1.1.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.5.4",
@@ -35,10 +37,10 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "fake-indexeddb": "^5.0.2",
     "oxlint": "^1.71.0",
     "typescript": "~6.0.2",
     "vite": "^8.1.1",
-    "vitest": "^3.2.7",
-    "fake-indexeddb": "^5.0.0"
+    "vitest": "^3.2.7"
   }
 }

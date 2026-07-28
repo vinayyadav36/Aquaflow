@@ -94,6 +94,22 @@ export async function addExpenseCategory(name: string): Promise<ExpenseCategoryR
   return cat;
 }
 
+export async function deleteExpenseCategory(id: string): Promise<void> {
+  const cat = await db.expenseCategories.get(id);
+  if (!cat) throw new Error('Category not found');
+  if (cat.isSystem) throw new Error('Cannot delete system category');
+  await db.expenseCategories.delete(id);
+}
+
+export async function renameExpenseCategory(id: string, newName: string): Promise<ExpenseCategoryRecord> {
+  const cat = await db.expenseCategories.get(id);
+  if (!cat) throw new Error('Category not found');
+  await db.expenseCategories.update(id, { name: newName });
+  const updated = await db.expenseCategories.get(id);
+  if (!updated) throw new Error('Category not found after update');
+  return updated;
+}
+
 export async function seedDefaultCategories(): Promise<void> {
   const existing = await db.expenseCategories.count();
   if (existing > 0) return;

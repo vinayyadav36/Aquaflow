@@ -1,6 +1,8 @@
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BackupSettings } from './components/BackupSettings';
+import { CategoryManager } from './components/CategoryManager';
+import { BudgetManager } from './components/BudgetManager';
 
 export function SettingsPage() {
   return (
@@ -12,6 +14,8 @@ export function SettingsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
       </div>
 
+      <CategoryManager />
+      <BudgetManager />
       <BackupSettings />
     </div>
   );

@@ -22,6 +22,8 @@ export interface IExpenseService {
   getExpenseCategorySummaryApi(query?: ExpenseListQuery): Promise<CategorySummaryResponse>;
   getCategories(): Promise<ExpenseCategoryRecord[]>;
   addCategory(name: string): Promise<ExpenseCategoryRecord>;
+  deleteCategory(id: string): Promise<void>;
+  renameCategory(id: string, newName: string): Promise<ExpenseCategoryRecord>;
   getSettings(): Promise<{ id: string; nextExpenseNumber: number; allowCustomCategories: boolean; recentCategories: string[] }>;
   updateSettings(updates: { allowCustomCategories?: boolean; recentCategories?: string[] }): Promise<any>;
   copyLastExpense(): Promise<CreateExpenseInput | null>;

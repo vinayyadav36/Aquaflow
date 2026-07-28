@@ -8,6 +8,7 @@ import ExpensesListPage from './modules/expenses/ExpensesListPage.tsx';
 import NewExpensePage from './modules/expenses/NewExpensePage.tsx';
 import ExpenseDetailPage from './modules/expenses/ExpenseDetailPage.tsx';
 import { SettingsPage } from './modules/expenses/SettingsPage.tsx';
+import PartyDetailPage from './modules/expenses/PartyDetailPage.tsx';
 import { initDbSeed } from './modules/expenses/seed.ts';
 import { expenseService } from './modules/expenses/api/expenseService.ts';
 
@@ -27,7 +28,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="expenses/new" element={<NewExpensePage />} />
           <Route path="expenses/:id" element={<ExpenseDetailPage />} />
           <Route path="expenses/:id/edit" element={<NewExpensePage />} />
-          <Route path="parties/:id" element={<div className="p-4 text-center text-gray-500 py-20">Party Detail</div>} />
+          <Route path="parties/:id" element={<PartyDetailPage />} />
           <Route path="*" element={<Navigate to="/expenses" replace />} />
         </Route>
       </Routes>

@@ -22,6 +22,8 @@ export interface ExpenseRecord {
   createdAt: string;
   updatedAt: string;
   createdSource?: 'manual' | 'supplier_payment' | 'adjustment';
+  receiptUrl?: string;
+  receiptName?: string;
 }
 
 export interface ExpenseCategoryRecord {
@@ -46,11 +48,19 @@ export interface PartyRecord {
   phone?: string;
 }
 
+export interface BudgetRecord {
+  id: string;
+  category: string;
+  monthlyLimit: number;
+  createdAt: string;
+}
+
 const db = new Dexie('BusinessOSDB') as Dexie & {
   expenses: EntityTable<ExpenseRecord, 'id'>;
   expenseCategories: EntityTable<ExpenseCategoryRecord, 'id'>;
   expenseSettings: EntityTable<ExpenseSettingsRecord, 'id'>;
   parties: EntityTable<PartyRecord, 'id'>;
+  budgets: EntityTable<BudgetRecord, 'id'>;
 };
 
 // Schema definition
@@ -59,6 +69,10 @@ db.version(1).stores({
   expenseCategories: 'id, name, isSystem',
   expenseSettings: 'id',
   parties: 'id, primaryType'
+});
+
+db.version(2).stores({
+  budgets: 'id, category'
 });
 
 export { db };
