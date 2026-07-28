@@ -140,7 +140,7 @@ router.post('/', (req: Request, res: Response) => {
   const num = getNextExpenseNumber();
   const now = new Date().toISOString();
 
-  let partySnapshot = undefined;
+  let partySnapshot: any = undefined;
   if (partyId) {
     const party = usersDb.readById(partyId);
     if (party) {

@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../utils/currency";
 import { Ban, Users, RefreshCw } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import type { ExpenseDetailResponse } from '../api/dto';
@@ -28,7 +29,7 @@ export function ExpenseDetailCard({ expense, linkedParty, onNavigateParty }: Exp
 
       <div className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 ${isVoid ? 'opacity-70' : ''}`}>
         <h2 className={`text-3xl font-bold mb-1 ${isVoid ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-          ${expense.amount.toFixed(2)}
+          {formatCurrency(expense.amount)}
         </h2>
         <p className="text-gray-600 font-medium text-lg mb-6">{expense.title}</p>
 

@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../utils/currency";
 import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { RefreshCw, Users } from 'lucide-react';
@@ -25,7 +26,7 @@ export function ExpenseList({ expenses, compact }: { expenses: ExpenseDetailResp
               )}
             </h4>
             <span className={`font-bold whitespace-nowrap ${expense.status === 'voided' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-              ${expense.amount.toFixed(2)}
+              {formatCurrency(expense.amount)}
             </span>
           </div>
 

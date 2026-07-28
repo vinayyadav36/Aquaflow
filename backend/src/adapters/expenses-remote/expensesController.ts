@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { JsonStorage } from '../storage/jsonStorage';
+import { JsonStorage } from '../../storage/jsonStorage';
 
 interface ExpenseBackendRecord {
   id: string;
@@ -78,7 +78,7 @@ export const getSummary = (req: Request, res: Response) => {
     categoryTotals[r.category] = (categoryTotals[r.category] || 0) + r.amount;
   });
 
-  let topCategory = null;
+  let topCategory: any = null;
   let max = 0;
   for (const [name, amount] of Object.entries(categoryTotals)) {
     if (amount > max) { max = amount; topCategory = { name, amount }; }

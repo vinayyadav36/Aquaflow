@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../utils/currency";
 import { useState, useEffect } from 'react';
 import { PieChart, ArrowRight } from 'lucide-react';
 import { expenseService } from '../api/expenseService';
@@ -40,7 +41,7 @@ export function ExpenseCategoryBreakdown({ onSelectCategory }: ExpenseCategoryBr
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-sm font-medium text-gray-700 capitalize truncate">{cat.category}</span>
-                  <span className="text-sm font-bold text-gray-900">${cat.totalAmount.toFixed(2)}</span>
+                  <span className="text-sm font-bold text-gray-900">{formatCurrency(cat.totalAmount)}</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-1.5">
                   <div

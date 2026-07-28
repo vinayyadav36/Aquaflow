@@ -49,6 +49,11 @@ export class LocalExpenseService implements IExpenseService {
   }
 
   async updateExpense(id: string, input: UpdateExpenseInput): Promise<ExpenseDetailResponse> {
+    const existing = await getExpenseRecordById(id);
+    if (!existing) throw new Error('Expense not found');
+    if (existing.status === 'voided' && (input as any).status !== 'recorded') {
+      throw new Error('Cannot edit a voided record without explicitly un-voiding it first');
+    }
     const updates = { ...input } as any;
     if (updates.partyId === null) updates.partyId = undefined;
     const record = await updateExpenseRecord(id, updates);
@@ -247,3 +252,51 @@ export class LocalExpenseService implements IExpenseService {
 }
 
 export const expenseService = new LocalExpenseService();
+
+// Optional adapter stub for future sync
+export class RemoteExpenseService implements IExpenseService {
+  constructor(_baseUrl: string) {}
+
+  async createExpense(_input: CreateExpenseInput): Promise<ExpenseDetailResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async updateExpense(_id: string, _input: UpdateExpenseInput): Promise<ExpenseDetailResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async getExpenseById(_id: string): Promise<ExpenseDetailResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async getExpenses(_query?: ExpenseListQuery): Promise<ExpenseListResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async voidExpense(_id: string): Promise<VoidExpenseResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async duplicateExpense(_id: string): Promise<DuplicateExpenseResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async getExpenseSummary(_query?: ExpenseListQuery): Promise<ExpenseSummaryResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async getExpenseCategorySummaryApi(_query?: ExpenseListQuery): Promise<CategorySummaryResponse> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async getCategories(): Promise<ExpenseCategoryRecord[]> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async addCategory(_name: string): Promise<ExpenseCategoryRecord> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async getSettings(): Promise<any> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async updateSettings(_updates: any): Promise<any> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async copyLastExpense(): Promise<CreateExpenseInput | null> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+  async initializeDefaults(): Promise<void> {
+    throw new Error('Not implemented: Remote sync is an optional future feature');
+  }
+}
