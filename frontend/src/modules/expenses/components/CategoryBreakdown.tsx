@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../utils/currency";
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../lib/db';
 import type { CategorySummaryItem } from '../api/dto';
@@ -41,7 +42,7 @@ export function CategoryBreakdown() {
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <span className="text-xs font-semibold text-gray-800 w-20 text-right shrink-0">${cat.totalAmount.toFixed(0)}</span>
+              <span className="text-xs font-semibold text-gray-800 w-20 text-right shrink-0">{formatCurrency(cat.totalAmount)}</span>
               <span className="text-xs text-gray-400 w-8 text-right shrink-0">{share}%</span>
             </div>
           );

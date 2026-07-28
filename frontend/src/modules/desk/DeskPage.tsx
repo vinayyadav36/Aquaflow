@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../utils/currency";
 import { Link } from 'react-router-dom';
 import { Wallet, TrendingUp, DollarSign, Plus } from 'lucide-react';
 import { useExpensesList } from '../expenses/hooks/useExpensesList';
@@ -26,18 +27,18 @@ export default function DeskPage() {
               <div>
                 <p className="text-sm text-gray-500 font-medium">Month Total</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  ${summaries?.monthTotal.toFixed(2) || '0.00'}
+                  {summaries ? formatCurrency(summaries.monthTotal) : formatCurrency(0)}
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <span className="text-xs text-gray-400">Today</span>
-                <p className="text-sm font-semibold text-gray-800">${summaries?.todayTotal.toFixed(2) || '0.00'}</p>
+                <p className="text-sm font-semibold text-gray-800">{summaries ? formatCurrency(summaries.todayTotal) : formatCurrency(0)}</p>
               </div>
               <div>
                 <span className="text-xs text-gray-400">This Week</span>
-                <p className="text-sm font-semibold text-gray-800">${summaries?.weekTotal.toFixed(2) || '0.00'}</p>
+                <p className="text-sm font-semibold text-gray-800">{summaries ? formatCurrency(summaries.weekTotal) : formatCurrency(0)}</p>
               </div>
             </div>
           </div>
@@ -51,7 +52,7 @@ export default function DeskPage() {
               {summaries?.topCategory ? (
                 <>
                   <p className="text-sm font-semibold text-gray-900 capitalize">{summaries.topCategory.name}</p>
-                  <p className="text-lg font-bold text-gray-900">${summaries.topCategory.amount.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-gray-900">{formatCurrency(summaries.topCategory.amount)}</p>
                 </>
               ) : (
                 <p className="text-sm text-gray-400">No data yet</p>
@@ -63,11 +64,11 @@ export default function DeskPage() {
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Cash vs Digital</span>
               </div>
               <p className="text-sm">
-                <span className="font-semibold text-gray-900">${summaries?.cashOutTotal.toFixed(2) || '0'}</span>
+                <span className="font-semibold text-gray-900">{summaries ? formatCurrency(summaries.cashOutTotal) : formatCurrency(0)}</span>
                 <span className="text-gray-400"> cash</span>
               </p>
               <p className="text-sm">
-                <span className="font-semibold text-gray-900">${summaries?.digitalOutTotal.toFixed(2) || '0'}</span>
+                <span className="font-semibold text-gray-900">{summaries ? formatCurrency(summaries.digitalOutTotal) : formatCurrency(0)}</span>
                 <span className="text-gray-400"> digital</span>
               </p>
             </div>

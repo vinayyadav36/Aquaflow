@@ -101,7 +101,7 @@ The module exposes these service methods through `IExpenseService`:
 | `getExpenseSummary(query)` | Get summary totals | `GET /api/expenses/summary` |
 | `getExpenseCategorySummaryApi(query)` | Get category breakdown | `GET /api/expenses/categories/summary` |
 
-All DTOs are JSON-safe and explicitly typed. The backend Express server also implements these same routes at `/api/expenses/*` using JSON file storage.
+All DTOs are JSON-safe and explicitly typed. The backend JSON Express adapter is quarantined as optional and not required for local app use.
 
 ## How Other Modules Can Consume
 
@@ -154,16 +154,16 @@ The `seed.ts` initializes the database with realistic demo data:
 2. A mock supplier party (Acme Wholesale Corp)
 3. A mock customer party (Green Leaf Cafe)
 4. Multiple expenses spanning different dates and categories:
-   - Monthly rent ($1,200, recurring)
-   - Supplier payment linked to supplier ($350.50)
-   - Transport expense ($25)
-   - Monthly subscription ($49.99, recurring)
-   - Voided expense ($199, cancelled)
-   - Stock purchase ($525.75)
-   - Utilities ($180)
-   - Marketing ($85)
-   - Food/tea ($45.50)
-   - Daily recurring expense ($2.50)
+   - Monthly rent (₹12,000, recurring)
+   - Supplier payment linked to supplier (₹3,500)
+   - Transport expense (₹250)
+   - Monthly subscription (₹499, recurring)
+   - Voided expense (₹19,900, cancelled)
+   - Stock purchase (₹52,500)
+   - Utilities (₹1,500)
+   - Marketing (₹8,500)
+   - Food/tea (₹450)
+   - Daily recurring expense (₹250)
 
 Seed data is created through the API service to ensure consistency.
 
@@ -192,18 +192,8 @@ npm test
 
 ## Backend API
 
-The Express backend at `backend/` includes expenses routes at `/api/expenses/*` matching the frontend API contract. Routes:
-
-```
-GET    /api/expenses              - List expenses (with query filters)
-GET    /api/expenses/summary      - Get expense summary
-GET    /api/expenses/categories/summary - Get category summary
-GET    /api/expenses/:id          - Get expense by ID
-POST   /api/expenses              - Create expense
-PATCH  /api/expenses/:id          - Update expense
-POST   /api/expenses/:id/void    - Void expense
-POST   /api/expenses/:id/duplicate - Duplicate expense
-```
+The Express backend previously handled expenses JSON storage. This has been moved to an optional adapter path (`backend/src/adapters/expenses-remote`) because the primary product direction is **local-first (Dexie)**.
+Remote syncing via a server is strictly an optional future capability and is not wired as the default path for installed PWA/APK use.
 
 ## Tech Stack
 

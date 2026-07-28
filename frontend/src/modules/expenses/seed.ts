@@ -1,5 +1,6 @@
-import { db } from '../../lib/db';
 import { expenseService } from './api/expenseService';
+import { db } from '../../lib/db';
+
 import { v4 as uuidv4 } from 'uuid';
 import { subDays } from 'date-fns';
 
@@ -42,7 +43,7 @@ export async function initDbSeed() {
 
     await expenseService.createExpense({
       title: 'Monthly Rent',
-      amount: 1200,
+      amount: 12000,
       category: 'rent',
       paymentMode: 'bank',
       date: daysAgo(5),
@@ -51,7 +52,7 @@ export async function initDbSeed() {
 
     await expenseService.createExpense({
       title: 'Restock Packaging',
-      amount: 350.50,
+      amount: 3500,
       category: 'supplier payment',
       paymentMode: 'upi',
       partyId: supplierId,
@@ -61,7 +62,7 @@ export async function initDbSeed() {
 
     await expenseService.createExpense({
       title: 'Taxi to client',
-      amount: 25,
+      amount: 250,
       category: 'transport',
       paymentMode: 'cash',
       date: daysAgo(0)
@@ -69,7 +70,7 @@ export async function initDbSeed() {
 
     await expenseService.createExpense({
       title: 'Office Supplies',
-      amount: 89.99,
+      amount: 850,
       category: 'stock purchase',
       paymentMode: 'card',
       date: daysAgo(3)
@@ -77,7 +78,7 @@ export async function initDbSeed() {
 
     await expenseService.createExpense({
       title: 'Electricity Bill',
-      amount: 180,
+      amount: 1500,
       category: 'utilities',
       paymentMode: 'bank',
       date: daysAgo(7),
@@ -86,7 +87,7 @@ export async function initDbSeed() {
 
     await expenseService.createExpense({
       title: 'Team Lunch',
-      amount: 45,
+      amount: 450,
       category: 'food/tea',
       paymentMode: 'cash',
       date: daysAgo(1)
@@ -94,7 +95,7 @@ export async function initDbSeed() {
 
     const voidedExp = await expenseService.createExpense({
       title: 'Software Sub (Cancelled)',
-      amount: 49.99,
+      amount: 499,
       category: 'subscriptions',
       paymentMode: 'card',
       date: daysAgo(10)

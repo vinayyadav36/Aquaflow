@@ -171,7 +171,7 @@ export function getExpenseSummary(): ExpenseSummaryResponseDto {
     catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
   });
 
-  let topCategory = null;
+  let topCategory: any = null;
   let max = 0;
   for (const [name, amount] of Object.entries(catTotals)) {
     if (amount > max) { max = amount; topCategory = { name, amount }; }

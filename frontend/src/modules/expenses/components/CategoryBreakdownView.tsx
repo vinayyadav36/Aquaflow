@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../utils/currency";
 import { useState } from 'react';
 import { useExpensesList } from '../hooks/useExpensesList';
 
@@ -40,7 +41,7 @@ export function CategoryBreakdownView() {
             >
               <div className="flex justify-between items-center mb-1.5">
                 <span className="font-semibold text-gray-900 capitalize text-sm">{cat.category}</span>
-                <span className="font-bold text-gray-900">${cat.totalAmount.toFixed(2)}</span>
+                <span className="font-bold text-gray-900">{formatCurrency(cat.totalAmount)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex-1 mr-3">
@@ -62,7 +63,7 @@ export function CategoryBreakdownView() {
             {filtered.slice(0, 10).map(e => (
               <div key={e.id} className="flex justify-between items-center text-sm">
                 <span className="text-gray-600 truncate pr-2">{e.title}</span>
-                <span className="font-medium text-gray-900">${e.amount.toFixed(2)}</span>
+                <span className="font-medium text-gray-900">{formatCurrency(e.amount)}</span>
               </div>
             ))}
           </div>

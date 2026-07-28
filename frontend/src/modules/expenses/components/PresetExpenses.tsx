@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../utils/currency";
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, Truck, Building2, Lightbulb, Plus } from 'lucide-react';
 
@@ -25,7 +26,7 @@ export function PresetExpenses() {
             </div>
             <div className="text-left">
               <span className="text-xs text-gray-400 block leading-tight">{preset.label}</span>
-              <span className="text-sm font-bold text-gray-900">${preset.amount}</span>
+              <span className="text-sm font-bold text-gray-900">{formatCurrency(preset.amount)}</span>
             </div>
           </button>
         ))}

@@ -7,6 +7,7 @@ import DeskPage from './modules/desk/DeskPage.tsx';
 import ExpensesListPage from './modules/expenses/ExpensesListPage.tsx';
 import NewExpensePage from './modules/expenses/NewExpensePage.tsx';
 import ExpenseDetailPage from './modules/expenses/ExpenseDetailPage.tsx';
+import { SettingsPage } from './modules/expenses/SettingsPage.tsx';
 import { initDbSeed } from './modules/expenses/seed.ts';
 import { expenseService } from './modules/expenses/api/expenseService.ts';
 
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
           <Route index element={<Navigate to="/expenses" replace />} />
           <Route path="desk" element={<DeskPage />} />
           <Route path="expenses" element={<ExpensesListPage />} />
+          <Route path="expenses/settings" element={<SettingsPage />} />
           <Route path="expenses/new" element={<NewExpensePage />} />
           <Route path="expenses/:id" element={<ExpenseDetailPage />} />
           <Route path="expenses/:id/edit" element={<NewExpensePage />} />
